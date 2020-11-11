@@ -12,6 +12,11 @@ namespace DirectoriesComparator.CommandLine.Parser.States
             return this;
          }
 
+         if (p_Word.Equals((CommandLineParser.MinFileSizePrefix)))
+         {
+             return new ClauseMinFileSizeInitiated();
+         }
+
          if (p_Word.Equals( (CommandLineParser.SourcePrefix) ))
          {
             if (this is ClauseSourceInitiated)
@@ -28,6 +33,8 @@ namespace DirectoriesComparator.CommandLine.Parser.States
 
          if (p_Word.Equals( (CommandLineParser.TargetPrefix) ))
          {
+             p_ParsingContext.Parameters.TargetListSpecified = true;
+
             if (this is ClauseTargetInitiated)
             {
                return this;

@@ -12,7 +12,11 @@ namespace DirectoriesComparator
       /// </summary>
       public string AdditionalMessage { get; set; }
       public ICollection<string> SourcesList { get; private set; }
+
       public ICollection<string> TargetsList { get; private set; }
+      public bool TargetListSpecified { get; set; }
+
+      public long MinFileSize { get; set; }
 
  
       public void Validate()

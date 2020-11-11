@@ -6,8 +6,9 @@ namespace DirectoriesComparator.CommandLine.Parser
    {
       public const string SourcePrefix = "/source:";
       public const string TargetPrefix = "/target:";
+      public const string MinFileSizePrefix = "/minsize:";
 
-      public static Parameters ParseCommandLine( string p_Args )
+        public static Parameters ParseCommandLine( string p_Args )
       {
          var result = new Parameters();
 
@@ -29,7 +30,7 @@ namespace DirectoriesComparator.CommandLine.Parser
          }
 
          var parserContext = new ParsingContext( result );
-         AbstractState currentState = new InitialState();
+         AbstractState currentState = InitialState.Item;
          foreach (var word in words)
          {
             currentState = currentState.ProcessWord( word, parserContext );

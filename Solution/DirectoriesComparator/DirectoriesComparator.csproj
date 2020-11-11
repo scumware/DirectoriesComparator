@@ -47,8 +47,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CommandLine\Parser\SizeDimension.cs" />
     <Compile Include="CommandLine\Parser\States\AbstractState.cs" />
     <Compile Include="CommandLine\Parser\ParsingContext.cs" />
+    <Compile Include="CommandLine\Parser\States\ClauseMinFileSizeInitiated.cs" />
     <Compile Include="EqualFilesGroup.cs" />
     <Compile Include="File.cs" />
     <Compile Include="FileOperations.cs" />

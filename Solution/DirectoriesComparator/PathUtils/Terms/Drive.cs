@@ -32,8 +32,11 @@ namespace DirectoriesComparator.PathUtils.Terms
 
       internal static bool ParseNext(PathValidatorContext p_ValidatorContext)
       {
-         int length;
-         if ((length = Root.TryParse( p_ValidatorContext )) > 0)
+          if (p_ValidatorContext.CurrentIndex >= p_ValidatorContext.TotalLength)
+              return true;
+
+         int length = Root.TryParse(p_ValidatorContext);
+         if (length > 0)
          {
             if (p_ValidatorContext.TryAddTerm( length ))
                if (p_ValidatorContext.TotalLength == p_ValidatorContext.ValidatedString.Length)

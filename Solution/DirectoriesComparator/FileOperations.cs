@@ -14,9 +14,29 @@ namespace DirectoriesComparator
          m_Parameters = p_Parameters;
 
          var sourceFiles = GetFiles(p_Parameters.SourcesList);
-         var targetFiles = GetFiles( p_Parameters.TargetsList );
+         if (p_Parameters.TargetListSpecified)
+         {
+             var targetFiles = GetFiles(p_Parameters.TargetsList);
+             return GetIntersection(sourceFiles, targetFiles);
+         }
+         else
+         {
+             var sourceFilesGroups = GetEqualFilesGroup(sourceFiles);
+             return CreateEqualFilesGroups(sourceFilesGroups);
+         }
+      }
 
-         return GetIntersection(sourceFiles, targetFiles);
+      private ICollection<EqualFilesGroup> CreateEqualFilesGroups(LinkedList<IList<File>> p_sourceFilesGroups)
+      {
+          var result = new List<EqualFilesGroup>();
+          var sourceFilesGroups = p_sourceFilesGroups.OrderBy(p_list => p_list.First().Size);
+          foreach (var sourceFilesGroup in sourceFilesGroups)
+          {
+              if (sourceFilesGroup.Count > 1)
+                  result.Add(new EqualFilesGroup(sourceFilesGroup, sourceFilesGroup));
+          }
+
+          return result;
       }
 
       private ICollection<EqualFilesGroup> GetIntersection(ICollection<File> p_SourceFiles,
@@ -152,9 +172,13 @@ namespace DirectoriesComparator
          var fileInfo = entiryInfo as FileInfo;
          if (fileInfo != null)
          {
-            var file = new File( fileInfo.FileName, fileInfo.Size );
-            result.Add( file );
-            return result;
+             if (m_Parameters.MinFileSize <= fileInfo.Size)
+             {
+                 var file = new File(fileInfo.FileName, fileInfo.Size);
+                 result.Add(file);
+             }
+
+             return result;
          }
 
          var directoryInfo = entiryInfo as DirectoryInfo;
@@ -172,17 +196,22 @@ namespace DirectoriesComparator
       }
 
 
-      private IEnumerable<File> GetFiles( DirectoryInfo p_DirectoryInfo )
+      private IEnumerable<File> GetFiles(DirectoryInfo p_DirectoryInfo)
       {
-         var result = new List<File>();
+          var result = new List<File>();
 
-         var fileInfos = p_DirectoryInfo.GetAllFiles(!m_Parameters.InvestigateJunctions, m_Parameters.IgnoreInaccessible);
-         foreach (var fileInfo in fileInfos)
-         {
-            var file = new File(fileInfo.FileName, fileInfo.Size);
-            result.Add(file);
-         }
-         return result;
+          var fileInfos =
+              p_DirectoryInfo.GetAllFiles(!m_Parameters.InvestigateJunctions, m_Parameters.IgnoreInaccessible);
+          foreach (var fileInfo in fileInfos)
+          {
+              if (m_Parameters.MinFileSize <= fileInfo.Size)
+              {
+                  var file = new File(fileInfo.FileName, fileInfo.Size);
+                  result.Add(file);
+              }
+          }
+
+          return result;
       }
    }
 }

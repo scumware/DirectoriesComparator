@@ -1,4 +1,5 @@
 ﻿using System;
+// ReSharper disable All
 
 namespace DirectoriesComparator.Win32.Interop
 {

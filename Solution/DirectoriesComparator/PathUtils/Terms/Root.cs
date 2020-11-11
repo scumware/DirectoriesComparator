@@ -10,22 +10,27 @@ namespace DirectoriesComparator.PathUtils.Terms
       public const int Length = 1;
 
       /// <summary>
-      /// Проверяет строку на наличие префикса UNC "\\".
+      /// Проверяет строку на наличие префикса '\'.
       /// В случае удачи возвращает собственную длинну, обратно - (-1)
       /// </summary>
       /// <param name="p_ValidatorContext"></param>
       /// <returns></returns>
       public static int TryParse(PathValidatorContext p_ValidatorContext)
       {
-         if ((p_ValidatorContext.CurrentIndex + Length) >= p_ValidatorContext.ValidatedString.Length)
-         {
-            return -1;
-         }
-         if (p_ValidatorContext.ValidatedString[p_ValidatorContext.CurrentIndex] == '\\')
-         {
-            return Length;
-         }
-         return -1;
+          var index = p_ValidatorContext.CurrentIndex;
+          var str = p_ValidatorContext.ValidatedString;
+
+          if ((index + Length) > str.Length)
+          {
+              return -1;
+          }
+
+          if (str[index] == '\\')
+          {
+              return Length;
+          }
+
+          return -1;
       }
 
       internal static bool ParseNext(PathValidatorContext p_ValidatorContext)

@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using DirectoriesComparator.Win32;
+using DirectoriesComparator.Win32.Interop;
+using Microsoft.Win32.SafeHandles;
 
 namespace DirectoriesComparator
 {
@@ -37,10 +41,20 @@ namespace DirectoriesComparator
 
       private byte[] CalculateHash()
       {
-         using (var fs = new FileStream(FullName, FileMode.Open, FileAccess.Read, FileShare.Read))
-         {
-            return HashAlgorithm.ComputeHash(fs);
-         }
+          IntPtr hFile = FileManagementImportedFunctions.CreateFile(FullName,
+              EFileAccess.FILE_READ_DATA,
+              EFileShare.Read | EFileShare.Write | EFileShare.Delete,
+              IntPtr.Zero,
+              ECreationDisposition.OpenExisting,
+              EFileAttributes.SequentialScan,
+              IntPtr.Zero);
+
+          var safeFileHandle = new SafeFileHandle(hFile, true);
+
+          using (var fs = new FileStream(safeFileHandle, FileAccess.Read))
+          {
+              return HashAlgorithm.ComputeHash(fs);
+          }
       }
 
       private static HashAlgorithm s_hashAlgorithm;
@@ -109,8 +123,37 @@ namespace DirectoriesComparator
                const int BufferSize = 4 * 1024;
                var leftBytes = new byte[BufferSize];
                var rightBytes = new byte[BufferSize];
-               using (var fsLeft = new FileStream(p_Left.FullName, FileMode.Open, FileAccess.Read))
-               using (var fsRight = new FileStream(p_Right.FullName, FileMode.Open, FileAccess.Read))
+
+               IntPtr hFile = FileManagementImportedFunctions.CreateFile(p_Left.FullName,
+                   EFileAccess.FILE_READ_DATA,
+                   EFileShare.Read | EFileShare.Write | EFileShare.Delete,
+                   IntPtr.Zero,
+                   ECreationDisposition.OpenExisting,
+                   EFileAttributes.SequentialScan,
+                   IntPtr.Zero);
+
+               var win32Error = Marshal.GetLastWin32Error();
+               if (win32Error != Win32Result.ERROR_SUCCESS)
+                   throw new Win32Exception(win32Error);
+
+               var leftFileHandle = new SafeFileHandle(hFile, true);
+
+               hFile = FileManagementImportedFunctions.CreateFile(p_Right.FullName,
+                   EFileAccess.FILE_READ_DATA,
+                   EFileShare.Read | EFileShare.Write | EFileShare.Delete,
+                   IntPtr.Zero,
+                   ECreationDisposition.OpenExisting,
+                   EFileAttributes.SequentialScan,
+                   IntPtr.Zero);
+
+               win32Error = Marshal.GetLastWin32Error();
+               if (win32Error != Win32Result.ERROR_SUCCESS)
+                   throw new Win32Exception(win32Error);
+
+               var rightFileHandle = new SafeFileHandle(hFile, true);
+
+               using (var fsLeft = new FileStream(leftFileHandle, FileAccess.Read))
+               using (var fsRight = new FileStream(rightFileHandle, FileAccess.Read))
                {
                   int readCount;
                   while (0 != (readCount = fsLeft.Read(leftBytes, 0, BufferSize)))

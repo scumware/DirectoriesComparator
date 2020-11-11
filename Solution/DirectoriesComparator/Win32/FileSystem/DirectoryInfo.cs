@@ -55,14 +55,20 @@ namespace DirectoriesComparator.Win32.FileSystem
 
             switch (win32Error)
             {
-               case Win32Result.ERROR_NO_MORE_FILES:
-               case Win32Result.ERROR_FILE_NOT_FOUND:
-                  break;
+                case Win32Result.ERROR_NO_MORE_FILES:
+                case Win32Result.ERROR_FILE_NOT_FOUND:
+                    break;
 
-               default:
-                  if (win32Error == Win32Result.ERROR_ACCESS_DENIED)
-                     Inaccessible = true;
-                  throw new Win32Exception( win32Error );
+                default:
+                    if (win32Error == Win32Result.ERROR_ACCESS_DENIED)
+                        Inaccessible = true;
+
+                    if (win32Error == Win32Result.ERROR_PATH_NOT_FOUND)
+                        if (path.Length >= Constants.MAX_PATH)
+                            Inaccessible = true;
+
+
+                    throw new Win32Exception(win32Error);
             }
          }
          finally
